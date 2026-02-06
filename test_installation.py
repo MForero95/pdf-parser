@@ -6,6 +6,7 @@ Run this after setup to ensure everything is working correctly.
 """
 
 import sys
+from importlib.util import find_spec
 from pathlib import Path
 
 
@@ -13,40 +14,31 @@ def test_imports():
     """Test that all required modules can be imported."""
     print("Testing imports...")
 
-    try:
-        import click
-
-        print("  ✅ click")
-    except ImportError as e:
-        print(f"  ❌ click: {e}")
+    # Test click
+    if find_spec("click") is None:
+        print("  ❌ click: Module not found")
         return False
+    print("  ✅ click")
 
-    try:
-        import dotenv
-
-        print("  ✅ python-dotenv")
-    except ImportError as e:
-        print(f"  ❌ python-dotenv: {e}")
+    # Test python-dotenv
+    if find_spec("dotenv") is None:
+        print("  ❌ python-dotenv: Module not found")
         return False
+    print("  ✅ python-dotenv")
 
-    try:
-        from rich.console import Console
-
-        print("  ✅ rich")
-    except ImportError as e:
-        print(f"  ❌ rich: {e}")
+    # Test rich
+    if find_spec("rich") is None:
+        print("  ❌ rich: Module not found")
         return False
+    print("  ✅ rich")
 
-    try:
-        import src.config
-        import src.converter
-        import src.file_picker
-        import src.utils
-
-        print("  ✅ All project modules")
-    except ImportError as e:
-        print(f"  ❌ Project modules: {e}")
-        return False
+    # Test project modules
+    modules = ["src.config", "src.converter", "src.file_picker", "src.utils"]
+    for module in modules:
+        if find_spec(module) is None:
+            print(f"  ❌ Project modules: {module} not found")
+            return False
+    print("  ✅ All project modules")
 
     return True
 
