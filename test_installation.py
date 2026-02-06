@@ -15,6 +15,7 @@ def test_imports():
 
     try:
         import click
+
         print("  ✅ click")
     except ImportError as e:
         print(f"  ❌ click: {e}")
@@ -22,6 +23,7 @@ def test_imports():
 
     try:
         import dotenv
+
         print("  ✅ python-dotenv")
     except ImportError as e:
         print(f"  ❌ python-dotenv: {e}")
@@ -29,6 +31,7 @@ def test_imports():
 
     try:
         from rich.console import Console
+
         print("  ✅ rich")
     except ImportError as e:
         print(f"  ❌ rich: {e}")
@@ -39,6 +42,7 @@ def test_imports():
         import src.converter
         import src.file_picker
         import src.utils
+
         print("  ✅ All project modules")
     except ImportError as e:
         print(f"  ❌ Project modules: {e}")
@@ -58,8 +62,9 @@ def test_configuration():
 
     try:
         from src.config import load_config
+
         config = load_config()
-        print(f"  ✅ Configuration loaded")
+        print("  ✅ Configuration loaded")
         print(f"     - API Key: {'✓ Set' if config.gemini_api_key else '✗ Missing'}")
         print(f"     - Output Dir: {config.output_dir}")
         print(f"     - Use LLM: {config.use_llm}")
@@ -98,7 +103,7 @@ def test_output_directory():
         print(f"  ✅ Output directory exists: {output_dir.resolve()}")
         return True
     else:
-        print(f"  ❌ Output directory not found")
+        print("  ❌ Output directory not found")
         return False
 
 
@@ -107,10 +112,14 @@ def test_python_version():
     print("Testing Python version...")
 
     if sys.version_info >= (3, 10):
-        print(f"  ✅ Python {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")
+        print(
+            f"  ✅ Python {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+        )
         return True
     else:
-        print(f"  ❌ Python {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")
+        print(
+            f"  ❌ Python {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+        )
         print("     Python 3.10+ required")
         return False
 

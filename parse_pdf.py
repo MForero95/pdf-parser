@@ -12,9 +12,14 @@ from typing import List, Optional
 
 import click
 from rich.console import Console
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn
+from rich.progress import (
+    Progress,
+    SpinnerColumn,
+    TextColumn,
+    BarColumn,
+    TimeElapsedColumn,
+)
 from rich.table import Table
-from rich.panel import Panel
 
 from src.config import load_config, Config
 from src.converter import convert_pdf_to_markdown, ConversionError
@@ -23,17 +28,21 @@ from src.utils import (
     validate_pdf,
     validate_marker_installation,
     ensure_directory,
-    get_file_info
+    get_file_info,
 )
 
 console = Console()
 
 
 @click.command()
-@click.argument('pdf_paths', nargs=-1, type=click.Path(exists=True))
-@click.option('--output-dir', default=None, help='Output directory for markdown files')
-@click.option('--no-llm', is_flag=True, help='Disable LLM for faster (but less accurate) processing')
-@click.option('--batch', is_flag=True, help='Enable batch mode for multiple files')
+@click.argument("pdf_paths", nargs=-1, type=click.Path(exists=True))
+@click.option("--output-dir", default=None, help="Output directory for markdown files")
+@click.option(
+    "--no-llm",
+    is_flag=True,
+    help="Disable LLM for faster (but less accurate) processing",
+)
+@click.option("--batch", is_flag=True, help="Enable batch mode for multiple files")
 def main(pdf_paths: tuple, output_dir: Optional[str], no_llm: bool, batch: bool):
     """
     Convert PDF files to Markdown using marker-pdf with Gemini API.
@@ -62,10 +71,7 @@ def main(pdf_paths: tuple, output_dir: Optional[str], no_llm: bool, batch: bool)
 
         # Load configuration
         try:
-            config = load_config(
-                output_dir=output_dir,
-                use_llm=not no_llm
-            )
+            config = load_config(output_dir=output_dir, use_llm=not no_llm)
         except ValueError as e:
             console.print(f"[bold red]❌ Configuration Error:[/bold red] {e}")
             sys.exit(1)
@@ -75,7 +81,9 @@ def main(pdf_paths: tuple, output_dir: Optional[str], no_llm: bool, batch: bool)
 
         # Validate marker installation
         if not validate_marker_installation():
-            console.print("\n[bold red]❌ Error:[/bold red] marker_single command not found.")
+            console.print(
+                "\n[bold red]❌ Error:[/bold red] marker_single command not found."
+            )
             console.print("\nPlease install marker-pdf:")
             console.print("  [bold]pip install marker-pdf[full][/bold]\n")
             sys.exit(1)
@@ -136,9 +144,13 @@ def display_config(config: Config):
     table.add_column("Setting", style="cyan")
     table.add_column("Value", style="green")
 
-    table.add_row("🔑 API Key", "✓ Configured" if config.gemini_api_key else "✗ Missing")
+    table.add_row(
+        "🔑 API Key", "✓ Configured" if config.gemini_api_key else "✗ Missing"
+    )
     table.add_row("📁 Output Dir", config.output_dir)
-    table.add_row("🤖 Use LLM", "Yes (Maximum accuracy)" if config.use_llm else "No (Faster)")
+    table.add_row(
+        "🤖 Use LLM", "Yes (Maximum accuracy)" if config.use_llm else "No (Faster)"
+    )
 
     console.print(table)
 
@@ -155,13 +167,8 @@ def display_files_summary(files: List[str]):
 
     for idx, file_path in enumerate(files, 1):
         info = get_file_info(file_path)
-        pages = str(info['pages']) if info['pages'] else "?"
-        table.add_row(
-            str(idx),
-            info['name'],
-            info['size_formatted'],
-            pages
-        )
+        pages = str(info["pages"]) if info["pages"] else "?"
+        table.add_row(str(idx), info["name"], info["size_formatted"], pages)
 
     console.print(table)
     console.print()
@@ -179,11 +186,11 @@ def process_files(files: List[str], config: Config) -> dict:
         dict: Processing results with success/failure counts
     """
     results = {
-        'total': len(files),
-        'success': 0,
-        'failed': 0,
-        'outputs': [],
-        'errors': []
+        "total": len(files),
+        "success": 0,
+        "failed": 0,
+        "outputs": [],
+        "errors": [],
     }
 
     start_time = time.time()
@@ -191,7 +198,9 @@ def process_files(files: List[str], config: Config) -> dict:
     for idx, pdf_path in enumerate(files, 1):
         file_name = Path(pdf_path).name
 
-        console.print(f"\n[bold cyan]Processing ({idx}/{len(files)}):[/bold cyan] {file_name}")
+        console.print(
+            f"\n[bold cyan]Processing ({idx}/{len(files)}):[/bold cyan] {file_name}"
+        )
 
         try:
             # Convert PDF
@@ -200,9 +209,9 @@ def process_files(files: List[str], config: Config) -> dict:
                 TextColumn("[progress.description]{task.description}"),
                 BarColumn(),
                 TimeElapsedColumn(),
-                console=console
+                console=console,
             ) as progress:
-                task = progress.add_task(f"Converting...", total=None)
+                task = progress.add_task("Converting...", total=None)
 
                 def update_progress(message: str):
                     progress.update(task, description=message[:50])
@@ -211,26 +220,26 @@ def process_files(files: List[str], config: Config) -> dict:
                     pdf_path,
                     config.output_dir,
                     config,
-                    progress_callback=update_progress
+                    progress_callback=update_progress,
                 )
 
             # Success
             console.print(f"[bold green]✅ Success![/bold green] Output: {output_file}")
-            results['success'] += 1
-            results['outputs'].append(output_file)
+            results["success"] += 1
+            results["outputs"].append(output_file)
 
         except ConversionError as e:
             console.print(f"[bold red]❌ Failed:[/bold red] {e}")
-            results['failed'] += 1
-            results['errors'].append({'file': pdf_path, 'error': str(e)})
+            results["failed"] += 1
+            results["errors"].append({"file": pdf_path, "error": str(e)})
 
         except Exception as e:
             console.print(f"[bold red]❌ Unexpected error:[/bold red] {e}")
-            results['failed'] += 1
-            results['errors'].append({'file': pdf_path, 'error': str(e)})
+            results["failed"] += 1
+            results["errors"].append({"file": pdf_path, "error": str(e)})
 
     elapsed_time = time.time() - start_time
-    results['elapsed_time'] = elapsed_time
+    results["elapsed_time"] = elapsed_time
 
     return results
 
@@ -246,12 +255,12 @@ def display_results_summary(results: dict):
     table.add_column("Metric", style="cyan")
     table.add_column("Count", justify="right")
 
-    table.add_row("Total files", str(results['total']))
+    table.add_row("Total files", str(results["total"]))
     table.add_row("✅ Successful", f"[green]{results['success']}[/green]")
     table.add_row("❌ Failed", f"[red]{results['failed']}[/red]")
 
     # Format elapsed time
-    elapsed = results.get('elapsed_time', 0)
+    elapsed = results.get("elapsed_time", 0)
     minutes = int(elapsed // 60)
     seconds = int(elapsed % 60)
     time_str = f"{minutes}m {seconds}s" if minutes > 0 else f"{seconds}s"
@@ -260,20 +269,20 @@ def display_results_summary(results: dict):
     console.print(table)
 
     # Show output files
-    if results['outputs']:
-        console.print(f"\n[bold green]✅ Output files:[/bold green]")
-        for output in results['outputs']:
+    if results["outputs"]:
+        console.print("\n[bold green]✅ Output files:[/bold green]")
+        for output in results["outputs"]:
             console.print(f"   📄 {output}")
 
     # Show errors
-    if results['errors']:
-        console.print(f"\n[bold red]❌ Failed files:[/bold red]")
-        for error in results['errors']:
+    if results["errors"]:
+        console.print("\n[bold red]❌ Failed files:[/bold red]")
+        for error in results["errors"]:
             console.print(f"   • {Path(error['file']).name}")
             console.print(f"     [dim]{error['error']}[/dim]")
 
     console.print()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

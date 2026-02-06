@@ -10,6 +10,7 @@ from .config import Config
 
 class ConversionError(Exception):
     """Exception raised when PDF conversion fails."""
+
     pass
 
 
@@ -17,7 +18,7 @@ def convert_pdf_to_markdown(
     pdf_path: str,
     output_dir: str,
     config: Config,
-    progress_callback: Optional[callable] = None
+    progress_callback: Optional[callable] = None,
 ) -> str:
     """
     Convert PDF to markdown using marker-pdf.
@@ -42,19 +43,21 @@ def convert_pdf_to_markdown(
 
     # Build marker_single command
     cmd = [
-        'marker_single',
+        "marker_single",
         str(pdf_path),
-        '--output_dir', str(output_dir),
-        '--output_format', 'markdown',
+        "--output_dir",
+        str(output_dir),
+        "--output_format",
+        "markdown",
     ]
 
     # Add LLM service if enabled (use Gemini)
     if config.use_llm:
-        cmd.extend(['--llm_service', 'marker.services.gemini.GoogleGeminiService'])
+        cmd.extend(["--llm_service", "marker.services.gemini.GoogleGeminiService"])
 
     # Set environment variables
     env = os.environ.copy()
-    env['GEMINI_API_KEY'] = config.gemini_api_key
+    env["GEMINI_API_KEY"] = config.gemini_api_key
 
     if progress_callback:
         progress_callback("Starting conversion...")
@@ -66,14 +69,14 @@ def convert_pdf_to_markdown(
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,  # Merge stderr into stdout
             env=env,
-            text=True
+            text=True,
         )
 
         # Capture output
         stdout_lines = []
 
         # Read stdout in real-time
-        for line in iter(process.stdout.readline, ''):
+        for line in iter(process.stdout.readline, ""):
             if line:
                 stdout_lines.append(line)
                 if progress_callback:
@@ -84,7 +87,7 @@ def convert_pdf_to_markdown(
 
         # Check return code
         if process.returncode != 0:
-            error_msg = ''.join(stdout_lines)
+            error_msg = "".join(stdout_lines)
             raise ConversionError(
                 f"Marker conversion failed with code {process.returncode}:\n{error_msg}"
             )
@@ -166,7 +169,7 @@ def parse_error_message(error_output: str) -> str:
     error_lower = error_output.lower()
 
     # API key errors
-    if 'api key' in error_lower or 'authentication' in error_lower:
+    if "api key" in error_lower or "authentication" in error_lower:
         return (
             "API key error: Your Gemini API key may be invalid or expired.\n"
             "Please check your .env file and verify your API key at:\n"
@@ -174,7 +177,7 @@ def parse_error_message(error_output: str) -> str:
         )
 
     # Out of memory errors
-    if 'out of memory' in error_lower or 'oom' in error_lower:
+    if "out of memory" in error_lower or "oom" in error_lower:
         return (
             "Out of memory error: The PDF may be too large or complex.\n"
             "Try:\n"
@@ -184,14 +187,14 @@ def parse_error_message(error_output: str) -> str:
         )
 
     # GPU/device errors
-    if 'cuda' in error_lower or 'mps' in error_lower or 'device' in error_lower:
+    if "cuda" in error_lower or "mps" in error_lower or "device" in error_lower:
         return (
             "Device error: Problem with GPU acceleration.\n"
             "Try: python parse_pdf.py --device cpu"
         )
 
     # Rate limiting
-    if 'rate limit' in error_lower or 'quota' in error_lower:
+    if "rate limit" in error_lower or "quota" in error_lower:
         return (
             "Rate limit error: You've exceeded the Gemini API rate limit.\n"
             "Please wait a few minutes and try again."

@@ -9,7 +9,6 @@ Handles:
 - Marker installation validation
 """
 
-import os
 import subprocess
 import sys
 from pathlib import Path
@@ -27,17 +26,17 @@ def check_python_version():
     print("Checking Python version...")
 
     if sys.version_info < (3, 10):
-        print(f"❌ Error: Python 3.10 or higher is required.")
+        print("❌ Error: Python 3.10 or higher is required.")
         print(f"   Current version: {sys.version}")
-        print(f"\n   Please upgrade Python and try again.")
+        print("\n   Please upgrade Python and try again.")
         sys.exit(1)
 
     if sys.version_info >= (3, 14):
-        print(f"❌ Error: Python 3.14+ is not yet supported.")
+        print("❌ Error: Python 3.14+ is not yet supported.")
         print(f"   Current version: {sys.version}")
-        print(f"\n   Please use Python 3.12 or 3.13.")
-        print(f"   You can install it with: brew install python@3.12")
-        print(f"   Then create a virtual environment: python3.12 -m venv venv")
+        print("\n   Please use Python 3.12 or 3.13.")
+        print("   You can install it with: brew install python@3.12")
+        print("   Then create a virtual environment: python3.12 -m venv venv")
         sys.exit(1)
 
     print(f"✅ Python {sys.version_info.major}.{sys.version_info.minor} detected")
@@ -56,14 +55,9 @@ def install_dependencies():
         sys.exit(1)
 
     try:
-        subprocess.check_call([
-            sys.executable,
-            "-m",
-            "pip",
-            "install",
-            "-r",
-            str(requirements_file)
-        ])
+        subprocess.check_call(
+            [sys.executable, "-m", "pip", "install", "-r", str(requirements_file)]
+        )
         print("\n✅ Dependencies installed successfully")
     except subprocess.CalledProcessError as e:
         print(f"\n❌ Failed to install dependencies: {e}")
@@ -106,12 +100,12 @@ def setup_configuration():
         break
 
     # Create .env file
-    with open(env_example_path, 'r') as f:
+    with open(env_example_path, "r") as f:
         content = f.read()
 
-    content = content.replace('your_api_key_here', api_key)
+    content = content.replace("your_api_key_here", api_key)
 
-    with open(env_path, 'w') as f:
+    with open(env_path, "w") as f:
         f.write(content)
 
     print("\n✅ .env file created successfully")
@@ -125,10 +119,7 @@ def validate_marker_installation():
 
     try:
         result = subprocess.run(
-            ['marker_single', '--help'],
-            capture_output=True,
-            text=True,
-            timeout=5
+            ["marker_single", "--help"], capture_output=True, text=True, timeout=5
         )
 
         if result.returncode == 0:

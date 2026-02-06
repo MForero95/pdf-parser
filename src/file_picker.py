@@ -2,7 +2,7 @@
 
 import sys
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
 
 def select_files(multiple: bool = False) -> List[str]:
@@ -55,25 +55,19 @@ def _select_via_gui(multiple: bool) -> List[str]:
 
     # Bring dialog to front on macOS
     root.lift()
-    root.attributes('-topmost', True)
-    root.after_idle(root.attributes, '-topmost', False)
+    root.attributes("-topmost", True)
+    root.after_idle(root.attributes, "-topmost", False)
 
     # Open file dialog
     if multiple:
         file_paths = filedialog.askopenfilenames(
             title="Select PDF files",
-            filetypes=[
-                ("PDF files", "*.pdf"),
-                ("All files", "*.*")
-            ]
+            filetypes=[("PDF files", "*.pdf"), ("All files", "*.*")],
         )
     else:
         file_path = filedialog.askopenfilename(
             title="Select PDF file",
-            filetypes=[
-                ("PDF files", "*.pdf"),
-                ("All files", "*.*")
-            ]
+            filetypes=[("PDF files", "*.pdf"), ("All files", "*.*")],
         )
         file_paths = [file_path] if file_path else []
 
@@ -137,9 +131,9 @@ def _select_via_cli(multiple: bool = False) -> List[str]:
 
             # Parse input (handle comma-separated or newline-separated)
             for line in lines:
-                if ',' in line:
+                if "," in line:
                     # Comma-separated
-                    paths = [p.strip() for p in line.split(',')]
+                    paths = [p.strip() for p in line.split(",")]
                     file_paths.extend(paths)
                 else:
                     # Single path per line
@@ -168,7 +162,11 @@ def _select_via_cli(multiple: bool = False) -> List[str]:
 
     for path in cleaned_paths:
         path_obj = Path(path)
-        if path_obj.exists() and path_obj.is_file() and path_obj.suffix.lower() == '.pdf':
+        if (
+            path_obj.exists()
+            and path_obj.is_file()
+            and path_obj.suffix.lower() == ".pdf"
+        ):
             valid_paths.append(str(path_obj.resolve()))
         else:
             invalid_paths.append(path)
@@ -205,7 +203,11 @@ def validate_paths(paths: List[str]) -> List[str]:
 
     for path in paths:
         path_obj = Path(path)
-        if path_obj.exists() and path_obj.is_file() and path_obj.suffix.lower() == '.pdf':
+        if (
+            path_obj.exists()
+            and path_obj.is_file()
+            and path_obj.suffix.lower() == ".pdf"
+        ):
             valid.append(str(path_obj.resolve()))
         else:
             invalid.append(path)

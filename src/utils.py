@@ -2,13 +2,13 @@
 
 import os
 import shutil
-import subprocess
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
 try:
     import pypdf
+
     PYPDF_AVAILABLE = True
 except ImportError:
     PYPDF_AVAILABLE = False
@@ -35,7 +35,7 @@ def validate_pdf(path: str) -> bool:
         return False
 
     # Check file extension
-    if pdf_path.suffix.lower() != '.pdf':
+    if pdf_path.suffix.lower() != ".pdf":
         return False
 
     # Check if readable
@@ -59,12 +59,12 @@ def generate_output_filename(pdf_path: str, output_dir: str) -> str:
         str: Full path to output markdown file
     """
     pdf_file = Path(pdf_path)
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     base_name = pdf_file.stem
 
     # Clean filename (remove special characters)
-    base_name = "".join(c for c in base_name if c.isalnum() or c in (' ', '-', '_'))
-    base_name = base_name.replace(' ', '_')
+    base_name = "".join(c for c in base_name if c.isalnum() or c in (" ", "-", "_"))
+    base_name = base_name.replace(" ", "_")
 
     output_filename = f"{base_name}_converted_{timestamp}.md"
     return str(Path(output_dir) / output_filename)
@@ -87,7 +87,7 @@ def validate_marker_installation() -> bool:
     Returns:
         bool: True if marker is installed, False otherwise
     """
-    return shutil.which('marker_single') is not None
+    return shutil.which("marker_single") is not None
 
 
 def get_pdf_page_count(path: str) -> Optional[int]:
@@ -104,7 +104,7 @@ def get_pdf_page_count(path: str) -> Optional[int]:
         return None
 
     try:
-        with open(path, 'rb') as f:
+        with open(path, "rb") as f:
             pdf_reader = pypdf.PdfReader(f)
             return len(pdf_reader.pages)
     except Exception:
@@ -121,7 +121,7 @@ def format_file_size(size_bytes: int) -> str:
     Returns:
         str: Formatted file size (e.g., "1.5 MB")
     """
-    for unit in ['B', 'KB', 'MB', 'GB']:
+    for unit in ["B", "KB", "MB", "GB"]:
         if size_bytes < 1024.0:
             return f"{size_bytes:.1f} {unit}"
         size_bytes /= 1024.0
@@ -140,10 +140,10 @@ def get_file_info(path: str) -> dict:
     """
     pdf_path = Path(path)
     info = {
-        'name': pdf_path.name,
-        'size': pdf_path.stat().st_size,
-        'size_formatted': format_file_size(pdf_path.stat().st_size),
-        'pages': get_pdf_page_count(str(pdf_path))
+        "name": pdf_path.name,
+        "size": pdf_path.stat().st_size,
+        "size_formatted": format_file_size(pdf_path.stat().st_size),
+        "pages": get_pdf_page_count(str(pdf_path)),
     }
     return info
 
@@ -156,4 +156,5 @@ def check_python_version() -> bool:
         bool: True if version is sufficient
     """
     import sys
+
     return sys.version_info >= (3, 10)

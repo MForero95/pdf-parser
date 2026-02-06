@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 @dataclass
 class Config:
     """Configuration for PDF to Markdown conversion."""
+
     gemini_api_key: str
     output_dir: str = "./output"
     use_llm: bool = True
@@ -30,7 +31,7 @@ def validate_api_key(key: Optional[str]) -> bool:
         return False
 
     # Check if it's not the placeholder value
-    if key.strip() in ['', 'your_api_key_here']:
+    if key.strip() in ["", "your_api_key_here"]:
         return False
 
     # Basic format check (Gemini API keys typically start with 'AIza')
@@ -44,8 +45,8 @@ def ensure_env_file() -> bool:
     Returns:
         bool: True if .env exists or was created, False if user cancelled
     """
-    env_path = Path('.env')
-    env_example_path = Path('.env.example')
+    env_path = Path(".env")
+    env_example_path = Path(".env.example")
 
     if env_path.exists():
         return True
@@ -53,21 +54,23 @@ def ensure_env_file() -> bool:
     # Create .env from .env.example
     if env_example_path.exists():
         print("\n📝 First-time setup: Creating .env file...")
-        print(f"\nGet your Gemini API key from: https://aistudio.google.com/app/apikey\n")
+        print(
+            "\nGet your Gemini API key from: https://aistudio.google.com/app/apikey\n"
+        )
 
         api_key = input("Enter your Gemini API key: ").strip()
 
-        if not api_key or api_key == 'your_api_key_here':
+        if not api_key or api_key == "your_api_key_here":
             print("❌ Invalid API key provided.")
             return False
 
         # Read .env.example and replace placeholder
-        with open(env_example_path, 'r') as f:
+        with open(env_example_path, "r") as f:
             content = f.read()
 
-        content = content.replace('your_api_key_here', api_key)
+        content = content.replace("your_api_key_here", api_key)
 
-        with open(env_path, 'w') as f:
+        with open(env_path, "w") as f:
             f.write(content)
 
         print("✅ .env file created successfully!\n")
@@ -76,8 +79,9 @@ def ensure_env_file() -> bool:
     return False
 
 
-def load_config(output_dir: Optional[str] = None,
-                use_llm: Optional[bool] = None) -> Config:
+def load_config(
+    output_dir: Optional[str] = None, use_llm: Optional[bool] = None
+) -> Config:
     """
     Load configuration from environment variables.
 
@@ -99,7 +103,7 @@ def load_config(output_dir: Optional[str] = None,
     load_dotenv()
 
     # Get API key
-    api_key = os.getenv('GEMINI_API_KEY')
+    api_key = os.getenv("GEMINI_API_KEY")
     if not validate_api_key(api_key):
         raise ValueError(
             "GEMINI_API_KEY is not set or invalid.\n"
@@ -109,15 +113,11 @@ def load_config(output_dir: Optional[str] = None,
 
     # Get output directory
     if output_dir is None:
-        output_dir = os.getenv('DEFAULT_OUTPUT_DIR', './output')
+        output_dir = os.getenv("DEFAULT_OUTPUT_DIR", "./output")
 
     # Get use_llm setting
     if use_llm is None:
-        use_llm_env = os.getenv('USE_LLM', 'true').lower()
-        use_llm = use_llm_env in ('true', '1', 'yes')
+        use_llm_env = os.getenv("USE_LLM", "true").lower()
+        use_llm = use_llm_env in ("true", "1", "yes")
 
-    return Config(
-        gemini_api_key=api_key,
-        output_dir=output_dir,
-        use_llm=use_llm
-    )
+    return Config(gemini_api_key=api_key, output_dir=output_dir, use_llm=use_llm)
